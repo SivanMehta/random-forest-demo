@@ -23,6 +23,11 @@ train <- data[1:(nrow(data)/2),]
 test <- data[(nrow(data)/2):nrow(data),]
 rf <- randomForest(group ~ ., train)
 
-results <- ifelse(predict(rf, newdata = test) > .5, 1, 0)
-accuracy <- length(which(results == test$group)) / nrow(test)
-print(accuracy * 100)
+test %>%
+  mutate(group.hat = ifelse(predict(rf, newdata = tibble(x, y)) > .5, 1, 0)) %>%
+  mutate(color = ifelse(group == group.hat, group, 3)) %>%
+  mutate(color = as.factor(color)) %>%
+  ggplot() +
+    geom_point(aes(x, y, color = color, alpha = color)) +
+    scale_colour_manual(values = c("#444444", "#777777", "#ff0000")) +
+    labs(title = 'Grey are correctly classified, red was wrong')
